@@ -1,0 +1,26 @@
+#include <gtest/gtest.h>
+#include "wav_parser.hpp"
+
+TEST(WavParserTest, LoadsCorrectSampleRate) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    EXPECT_EQ(wav.header.sample_rate, 44100);
+}
+
+TEST(WavParserTest, LoadsCorrectChannels) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    EXPECT_EQ(wav.header.num_of_channels, 1);
+}
+
+TEST(WavParserTest, LoadsCorrectBitsPerSample) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    EXPECT_EQ(wav.header.bits_per_sample, 16);
+}
+
+TEST(WavParserTest, LoadsCorrectNumberOfSamples) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    EXPECT_EQ(wav.samples.size(), 44100 * 3);
+}
+
+TEST(WavParserTest, ThrowsForMissingFile) {
+    EXPECT_THROW(load_wav("doesnt_exist.wav"), std::runtime_error);
+}
