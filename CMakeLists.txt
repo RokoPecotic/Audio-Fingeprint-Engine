@@ -28,6 +28,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 # Subdirectories
 add_subdirectory(core/audio)
+add_subdirectory(core/dsp)
 add_subdirectory(tests)
 add_subdirectory(bench)
 add_subdirectory(tools)
