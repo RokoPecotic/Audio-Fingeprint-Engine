@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
+#include <iostream>
+#include <cstdint>
 #include "wav_parser.hpp"
 #include "stft.hpp"
 #include "peak_extractor.hpp"
+#include "hasher.hpp"
 
 TEST(WavParserTest, LoadsCorrectSampleRate) {
     WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
@@ -52,5 +55,16 @@ TEST(PeakExtractorTest, FindsPeakAt440Hz) {
         }
     }
     EXPECT_TRUE(found_peak);
+}
 
+TEST(HasherTest, GeneratesHashEntries) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    STFT<Hann> stft(1024, 512);
+    auto spectogram = stft.compute(wav.samples);
+    PeakExtractor extractor(PEAKS_PER_FRAME);
+    auto peaks = extractor.extract(spectogram);
+
+    Hasher hasher;
+    auto entries = hasher.generate(peaks, 1);
+    EXPECT_GT(entries.size(), 10);
 }
