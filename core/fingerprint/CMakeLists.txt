@@ -1,5 +1,6 @@
 add_library(fingerprint
     hasher.cpp
+    database.cpp
 )
 
 target_include_directories(fingerprint PUBLIC 

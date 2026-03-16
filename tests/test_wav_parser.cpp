@@ -5,6 +5,7 @@
 #include "stft.hpp"
 #include "peak_extractor.hpp"
 #include "hasher.hpp"
+#include "database.hpp"
 
 TEST(WavParserTest, LoadsCorrectSampleRate) {
     WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
@@ -65,6 +66,31 @@ TEST(HasherTest, GeneratesHashEntries) {
     auto peaks = extractor.extract(spectogram);
 
     Hasher hasher;
-    auto entries = hasher.generate(peaks, 1);
+    auto entries = hasher.generate(peaks, 0);
     EXPECT_GT(entries.size(), 10);
+    std::cout << "Entries: " << entries.size() << std::endl;
+}
+
+TEST(DatabaseTest, LookupReturnsMatches) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    STFT<Hann> stft(1024, 512);
+    auto spectogram = stft.compute(wav.samples);
+    PeakExtractor extractor(PEAKS_PER_FRAME);
+    auto peaks = extractor.extract(spectogram);
+
+    Hasher hasher;
+    auto entries = hasher.generate(peaks, 0);
+
+    Database db;
+    db.add(entries);
+
+    uint32_t key = entries[0].hash.to_key();
+    auto results = db.lookup(key);
+    EXPECT_GT(results.size(), 0);
+}
+
+TEST(DatabaseTest, LookupMissingKeyReturnsEmpty){
+    Database db;
+    auto results = db.lookup(999999999);
+    EXPECT_EQ(results.size(), 0);
 }
