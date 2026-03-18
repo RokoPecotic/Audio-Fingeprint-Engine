@@ -6,6 +6,7 @@
 #include "peak_extractor.hpp"
 #include "hasher.hpp"
 #include "database.hpp"
+#include "matcher.hpp"
 
 TEST(WavParserTest, LoadsCorrectSampleRate) {
     WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
@@ -93,4 +94,24 @@ TEST(DatabaseTest, LookupMissingKeyReturnsEmpty){
     Database db;
     auto results = db.lookup(999999999);
     EXPECT_EQ(results.size(), 0);
+}
+
+TEST(MatcherTest, MatchesSameSong) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    STFT<Hann> stft(1024, 512);
+    auto spectogram = stft.compute(wav.samples);
+    PeakExtractor extractor(PEAKS_PER_FRAME);
+    auto peaks = extractor.extract(spectogram);
+
+    Hasher hasher;
+    auto entries = hasher.generate(peaks, 0);
+
+    Database db;
+    db.add(entries);
+
+    Matcher matcher(db);
+    auto result = matcher.match(entries);
+
+    EXPECT_EQ(result.song_id, 0);
+    EXPECT_GT(result.score, 100);
 }
