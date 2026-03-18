@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cstdint>
+#include <string>
 #include "hasher.hpp"
 
 struct MatchEntry{
@@ -15,4 +16,6 @@ class Database{
     public:
     void add(const std::vector<HashEntry>& entry);
     std::vector<MatchEntry> lookup(uint32_t hash_key) const;
+    void save(const std::string& path) const;
+    void load(const std::string& path);
 };

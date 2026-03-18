@@ -115,3 +115,25 @@ TEST(MatcherTest, MatchesSameSong) {
     EXPECT_EQ(result.song_id, 0);
     EXPECT_GT(result.score, 100);
 }
+
+TEST(DatabaseTest, SaveAndLoad) {
+    WavFile wav = load_wav(TEST_DATA_DIR "/test_440hz.wav");
+    STFT<Hann> stft(1024, 512);
+    auto spectrogram = stft.compute(wav.samples);
+    PeakExtractor extractor(PEAKS_PER_FRAME);
+    auto peaks = extractor.extract(spectrogram);
+
+    Hasher hasher;
+    auto entries = hasher.generate(peaks, 0);
+
+    Database db;
+    db.add(entries);
+    db.save("/tmp/test_db.bin");
+
+    Database db2;
+    db2.load("/tmp/test_db.bin");
+
+    uint32_t key = entries[0].hash.to_key();
+    auto results = db2.lookup(key);
+    EXPECT_GT(results.size(), 0);
+}
