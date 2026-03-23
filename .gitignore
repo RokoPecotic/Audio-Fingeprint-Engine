@@ -1,1 +1,5 @@
 build/
+*.bin
+test_audio/*.wav
+test_audio/*.mp3
+!test_audio/test_440hz.wav
